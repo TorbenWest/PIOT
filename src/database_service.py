@@ -5,31 +5,23 @@ import mysql.connector
 from mysql.connector import errorcode
 
 from console_service import print_database
+from config_service import ConfigService
 
 
 # https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html
 class MySqlConnector:
 
     def __init__(self) -> None:
-        config = {
-            'user': 'smartdoor',
-            'password': 'c$7^tvMaT7q51tZ0kY0w',
-            'host': '45.142.115.34',
-            'port': '3306',
-            'database': 'smartdoor',
-            'raise_on_warnings': False
-        }
-
         try:
-            self.con = mysql.connector.connect(**config)
+            self.con = mysql.connector.connect(**ConfigService.database_config)
             self.cur = self.con.cursor(dictionary=True)
             print_database('Database connection established!')
 
-            if self.__schema_already_exists():
+            if self._schema_already_exists():
                 print_database('Schema already created!')
             else:
                 print_database('Creating schema...')
-                self.__execute_script()
+                self._execute_script()
                 print_database('Successfully created schema!')
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -40,7 +32,7 @@ class MySqlConnector:
                 print_database(err)
 
     # https://www.w3schools.com/python/python_mysql_select.asp
-    def __schema_already_exists(self) -> bool:
+    def _schema_already_exists(self) -> bool:
         query: str = ("SELECT COUNT(*) AS count "
                       "FROM information_schema.tables "
                       "WHERE table_schema = 'smartdoor' "
@@ -51,8 +43,8 @@ class MySqlConnector:
         cursor.close()
         return rs[0] == 3
 
-    def __execute_script(self) -> None:
-        with open('schema.sql', 'r') as sql_file:
+    def _execute_script(self) -> None:
+        with open('resources/schema.sql', 'r') as sql_file:
             result_iterator = self.cur.execute(sql_file.read(), multi=True)
             for res in result_iterator:
                 print_database(f'Running query: \n{res.statement}')
@@ -67,7 +59,7 @@ class MySqlConnector:
 
 
 # https://datagy.io/python-append-to-tuple/
-class MySqlService:
+class DatabaseService:
 
     def __init__(self, con) -> None:
         self.con = con
@@ -76,8 +68,37 @@ class MySqlService:
     def bd_addr_exists(self, bd_addr: str) -> bool:
         query: str = ("SELECT bd_addr FROM sd_user "
                       "WHERE bd_addr = %s")
-        rs: list = self.__select(query, tuple([bd_addr]))
+        rs: list = self._select(query, tuple([bd_addr]))
         return len(rs) == 1
+
+    def get_commands_for_bd_addresses(self, bd_addresses: list) -> list:
+        placeholder: str = ''
+        for i in range(0, len(bd_addresses)):
+            placeholder += '%s'
+            if i < len(bd_addresses) - 1:
+                placeholder += ', '
+
+        query: str = ("SELECT user_id, cmd_open, cmd_close, cmd_lock, cmd_unlock "
+                      "FROM sd_user "
+                      "INNER JOIN sd_user_commands suc on sd_user.id = suc.user_id "
+                      f"WHERE bd_addr IN ({placeholder})")
+        rs: list = self._select(query, tuple(bd_addresses))
+
+        if len(rs) == 0:
+            return rs
+
+        result: list = []
+
+        for current in rs:
+            result.append(dict({
+                'user_id': current[0],
+                'cmd_open': current[1],
+                'cmd_close': current[2],
+                'cmd_lock': current[3],
+                'cmd_unlock': current[4]
+            }))
+
+        return result
 
     # Example usage: insert_user((username, password, bd_addr), (cmd_open, cmd_close, cmd_close, cmd_unlock))
     def insert_user(self, data_user: tuple, data_commands: tuple) -> None:
@@ -91,11 +112,11 @@ class MySqlService:
 
         # Hashing the password
         data_user_list: list = list(data_user)
-        data_user_list[1]: str = MySqlService.hash_password(data_user_list[1])
+        data_user_list[1]: str = DatabaseService.hash_password(data_user_list[1])
 
         # Inserting values
-        user_id: int = self.__insert(add_user, tuple(data_user_list))
-        self.__insert(add_commands, (user_id,) + data_commands)
+        user_id: int = self._insert(add_user, tuple(data_user_list))
+        self._insert(add_commands, (user_id,) + data_commands)
 
     # https://flexiple.com/python/python-timestamp/
     def insert_interaction_log(self, user_id: int, command: str) -> None:
@@ -105,10 +126,10 @@ class MySqlService:
                                     "VALUES (%s, %s, %s)")
 
         # Inserting values
-        self.__insert(add_interaction_log, (user_id, command, datetime.fromtimestamp(datetime.now().timestamp())))
+        self._insert(add_interaction_log, (user_id, command, datetime.fromtimestamp(datetime.now().timestamp())))
 
     # https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
-    def __insert(self, statement: str, data: tuple) -> int:
+    def _insert(self, statement: str, data: tuple) -> int:
         # Get cursor
         self.con.reconnect()
         cursor: any = self.con.cursor()
@@ -123,7 +144,7 @@ class MySqlService:
         # Return generated id
         return last_id
 
-    def __select(self, statement: str, data: tuple) -> list:
+    def _select(self, statement: str, data: tuple) -> list:
         self.con.reconnect()
         cursor: any = self.con.cursor()
         cursor.execute(statement, data)

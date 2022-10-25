@@ -14,3 +14,4 @@
 ### Libraries
 1. pip3 install mysql-connector-python==8.0.29
 2. pip install pybluez
+3. pip install pyyaml

@@ -1,0 +1,13 @@
+mysql:
+  database: 'smartdoor'
+  user: 'smartdoor'
+  password: 'c$7^tvMaT7q51tZ0kY0w'
+  host: '45.142.115.34'
+  port: '3306'
+  raise_on_warnings: false
+
+bluetooth:
+  # How long the Bluetooth service should search for devices. Given in seconds.
+  discover_duration: 10
+  # The interval in which the scan method will be called. Given in seconds.
+  scan_interval: 20
