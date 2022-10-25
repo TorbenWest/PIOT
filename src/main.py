@@ -12,7 +12,7 @@ async def main():
     connector = MySqlConnector()
     db_service = DatabaseService(connector.con)
 
-    db_service.get_commands_for_bd_addresses(['A8:AB:B5:DC:DC:BF'])
+    # db_service.get_commands_for_bd_addresses(['A8:AB:B5:DC:DC:BF'])
     # db_service.insert_user(("torben", "password123", "A8:AB:B5:DC:DC:BF"), ("open", "close", "lock", "unlock"))
 
     bt_service = BluetoothService(db_service)
@@ -22,7 +22,7 @@ async def main():
     try:
         await p.start()
         await asyncio.sleep(30)
-        m_service.match_word('open')
+        m_service.match_word('close')
         await p.stop()
         connector.close_connection()
     finally:

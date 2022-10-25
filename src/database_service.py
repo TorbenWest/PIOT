@@ -36,7 +36,7 @@ class MySqlConnector:
         query: str = ("SELECT COUNT(*) AS count "
                       "FROM information_schema.tables "
                       "WHERE table_schema = 'smartdoor' "
-                      "AND table_name IN ('sd_user', 'sd_user_commands', 'sd_user_interaction_log')")
+                      "AND table_name IN ('sd_user', 'sd_user_commands', 'sd_user_interaction_log');")
         cursor: any = self.con.cursor()
         cursor.execute(query)
         rs: tuple = cursor.fetchone()
@@ -67,7 +67,7 @@ class DatabaseService:
     # https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-select.html
     def bd_addr_exists(self, bd_addr: str) -> bool:
         query: str = ("SELECT bd_addr FROM sd_user "
-                      "WHERE bd_addr = %s")
+                      "WHERE bd_addr = %s;")
         rs: list = self._select(query, tuple([bd_addr]))
         return len(rs) == 1
 
@@ -81,7 +81,8 @@ class DatabaseService:
         query: str = ("SELECT user_id, cmd_open, cmd_close, cmd_lock, cmd_unlock "
                       "FROM sd_user "
                       "INNER JOIN sd_user_commands suc on sd_user.id = suc.user_id "
-                      f"WHERE bd_addr IN ({placeholder})")
+                      f"WHERE bd_addr IN ({placeholder}) "
+                      "AND sd_user.is_activated;")
         rs: list = self._select(query, tuple(bd_addresses))
 
         if len(rs) == 0:
@@ -105,10 +106,10 @@ class DatabaseService:
         # Define queries
         add_user: str = ("INSERT INTO sd_user "
                          "(username, hashed_password, bd_addr) "
-                         "VALUES (%s, %s, %s)")
+                         "VALUES (%s, %s, %s);")
         add_commands: str = ("INSERT INTO sd_user_commands "
                              "(user_id, cmd_open, cmd_close, cmd_lock, cmd_unlock) "
-                             "VALUES (%s, %s, %s, %s, %s)")
+                             "VALUES (%s, %s, %s, %s, %s);")
 
         # Hashing the password
         data_user_list: list = list(data_user)
@@ -123,7 +124,7 @@ class DatabaseService:
         # Define query
         add_interaction_log: str = ("INSERT INTO sd_user_interaction_log "
                                     "(user_id, command, cmd_timestamp) "
-                                    "VALUES (%s, %s, %s)")
+                                    "VALUES (%s, %s, %s);")
 
         # Inserting values
         self._insert(add_interaction_log, (user_id, command, datetime.fromtimestamp(datetime.now().timestamp())))

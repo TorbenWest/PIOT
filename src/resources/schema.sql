@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS sd_user_commands
 
 CREATE TABLE IF NOT EXISTS sd_user_interaction_log
 (
-    user_id       int          NOT NULL UNIQUE,
+    user_id       int          NOT NULL,
     command       VARCHAR(255) NOT NULL CHECK (command IN ('cmd_open', 'cmd_close', 'cmd_lock', 'cmd_unlock')),
     cmd_timestamp timestamp    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES sd_user (id) ON DELETE CASCADE
