@@ -1,15 +1,15 @@
 import asyncio
 
-from bluetooth_service import BluetoothService
-from config_service import ConfigService
-from database_service import MySqlConnector, DatabaseService
-from microphone_service import MicrophoneService
+from services.bluetooth_service import BluetoothService
+from services.config_service import ConfigService
+from services.database_service import MySqlConnector, DatabaseService
+from services.microphone_service import MicrophoneService
 from periodic import Periodic
 
 
 async def main():
-    ConfigService.read()
-    connector = MySqlConnector()
+    config_service = ConfigService()
+    connector = MySqlConnector(config_service.database_config)
     db_service = DatabaseService(connector.con)
 
     # db_service.get_commands_for_bd_addresses(['A8:AB:B5:DC:DC:BF'])
@@ -17,7 +17,8 @@ async def main():
 
     bt_service = BluetoothService(db_service)
     m_service = MicrophoneService(bt_service)
-    p = Periodic(lambda: bt_service.scan(), ConfigService.bluetooth_config.get('scan_interval'))
+    p = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
+                 config_service.bluetooth_config.get('scan_interval'))
 
     try:
         await p.start()

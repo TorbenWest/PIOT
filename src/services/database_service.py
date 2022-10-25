@@ -5,15 +5,14 @@ import mysql.connector
 from mysql.connector import errorcode
 
 from console_service import print_database
-from config_service import ConfigService
 
 
 # https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html
 class MySqlConnector:
 
-    def __init__(self) -> None:
+    def __init__(self, config: dict) -> None:
         try:
-            self.con = mysql.connector.connect(**ConfigService.database_config)
+            self.con = mysql.connector.connect(**config)
             self.cur = self.con.cursor(dictionary=True)
             print_database('Database connection established!')
 

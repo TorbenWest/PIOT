@@ -12,10 +12,9 @@ class BluetoothService:
         self.db_service: DatabaseService = service
 
     # https://github.com/pybluez/pybluez
-    def scan(self) -> None:
+    def scan(self, duration: int) -> None:
         print_bluetooth('Scanning for bluetooth devices...')
-        devices = bluetooth.discover_devices(duration=ConfigService.bluetooth_config.get('discover_duration'),
-                                             lookup_names=True)
+        devices = bluetooth.discover_devices(duration=duration, lookup_names=True)
 
         for current in self.devices_in_range:
             if not any(device[0] == current.get('bd_addr') for device in devices):
