@@ -2,7 +2,7 @@ import yaml
 
 from yaml.loader import BaseLoader
 
-from console_service import print_config
+from services.console_service import print_config
 
 
 class ConfigService:

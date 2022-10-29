@@ -1,8 +1,7 @@
 import bluetooth
 
-from console_service import print_bluetooth
-from database_service import DatabaseService
-from config_service import ConfigService
+from services.console_service import print_bluetooth
+from services.database_service import DatabaseService
 
 
 class BluetoothService:

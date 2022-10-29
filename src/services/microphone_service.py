@@ -1,7 +1,7 @@
-from bluetooth_service import BluetoothService
-from door_service import DoorService
-from console_service import print_microphone
-from database_service import DatabaseService
+from services.bluetooth_service import BluetoothService
+from services.door_service import DoorService
+from services.console_service import print_microphone
+from services.database_service import DatabaseService
 
 
 class MicrophoneService:

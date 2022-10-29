@@ -4,7 +4,7 @@ from datetime import datetime
 import mysql.connector
 from mysql.connector import errorcode
 
-from console_service import print_database
+from services.console_service import print_database
 
 
 # https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html

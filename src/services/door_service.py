@@ -1,5 +1,5 @@
-from database_service import DatabaseService
-from console_service import print_door
+from services.database_service import DatabaseService
+from services.console_service import print_door
 
 
 class DoorService:
