@@ -5,6 +5,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 from services.console_service import print_database
+from errors.user_not_exists_error import UserNotExistsError
 
 
 # https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html
@@ -70,6 +71,41 @@ class DatabaseService:
         rs: list = self._select(query, tuple([bd_addr]))
         return len(rs) == 1
 
+    def get_all_users(self) -> list:
+        query: str = "SELECT id, username, bd_addr, is_activated FROM sd_user;"
+        rs: list = self._select(query, tuple())
+        if len(rs) == 0:
+            return rs
+
+        result: list = []
+        for current in rs:
+            result.append(dict({
+                'user_id': current[0],
+                'username': current[1],
+                'bd_addr': current[2],
+                'is_activated': current[3]
+            }))
+        return result
+
+    def get_user(self, username: str, plain_password: str) -> int:
+        query: str = ("SELECT id "
+                      "FROM sd_user "
+                      "WHERE username = %s "
+                      "AND hashed_password = %s;")
+        rs: list = self._select(query, (username, DatabaseService.hash_password(plain_password)))
+        return -1 if len(rs) == 0 else rs[0][0]
+
+    def get_user_bd_address(self, user_id: int) -> str:
+        query: str = ("SELECT bd_addr "
+                      "FROM sd_user "
+                      "WHERE id = %s;")
+        rs: list = self._select(query, tuple([user_id]))
+
+        if len(rs) == 0:
+            raise UserNotExistsError(user_id)
+
+        return rs[0][0]
+
     def get_commands_for_bd_addresses(self, bd_addresses: list) -> list:
         placeholder: str = ''
         for i in range(0, len(bd_addresses)):
@@ -99,6 +135,26 @@ class DatabaseService:
             }))
 
         return result
+
+    def change_account_activation(self, user_id: int, is_activated: bool) -> None:
+        query: str = ("UPDATE sd_user "
+                      "SET is_activated = %s "
+                      "WHERE id = %s;")
+        self._commit(query, (is_activated, user_id))
+
+    def change_command(self, user_id: int, command: str, value: str) -> None:
+        if command not in ('cmd_open', 'cmd_close', 'cmd_lock', 'cmd_unlock'):
+            raise ValueError('Invalid command label used: %s' % command)
+
+        query: str = ("UPDATE sd_user_commands "
+                      "SET %s = %s "
+                      "WHERE id = %s;")
+        self._commit(query, (command, value, user_id))
+
+    def delete_user(self, user_id: int) -> None:
+        query: str = ("DELETE FROM sd_user "
+                      "WHERE id = %s;")
+        self._commit(query, tuple([user_id]))
 
     # Example usage: insert_user((username, password, bd_addr), (cmd_open, cmd_close, cmd_close, cmd_unlock))
     def insert_user(self, data_user: tuple, data_commands: tuple) -> None:
@@ -143,6 +199,13 @@ class DatabaseService:
         cursor.close()
         # Return generated id
         return last_id
+
+    def _commit(self, statement: str, data: tuple) -> None:
+        self.con.reconnect()
+        cursor: any = self.con.cursor()
+        cursor.execute(statement, data)
+        self.con.commit()
+        cursor.close()
 
     def _select(self, statement: str, data: tuple) -> list:
         self.con.reconnect()
