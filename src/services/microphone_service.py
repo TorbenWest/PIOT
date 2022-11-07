@@ -58,5 +58,5 @@ class MicrophoneService:
             try:
                 said = r.recognize_google(audio)
             except Exception as e:
-                print("Exception: " + str(e))
+                print_microphone('Exception: %s' % e)
         return said.lower()

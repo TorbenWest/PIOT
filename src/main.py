@@ -1,4 +1,6 @@
 import asyncio
+import sys
+import getopt
 
 from services.bluetooth_service import BluetoothService
 from services.config_service import ConfigService
@@ -7,7 +9,14 @@ from services.microphone_service import MicrophoneService
 from periodic import Periodic
 
 
-async def main():
+async def main(argv: list) -> None:
+    try:
+        opts, args = getopt.getopt(argv, "hbf", ["backend", "frontend"])
+    except getopt.GetoptError:
+        print('main.py -b')
+        print('main.py -f')
+        sys.exit(2)
+
     config_service = ConfigService()
     connector = MySqlConnector(config_service.database_config)
     db_service = DatabaseService(connector.con)
@@ -23,13 +32,31 @@ async def main():
 
     p = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
                  config_service.bluetooth_config.get('scan_interval'))
-    microphone = Periodic(lambda: m_service.listen(), 1)
+
+    microphone = None
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print('main.py -b')
+            print('main.py -f')
+            sys.exit()
+        elif opt in ("-b", "--backend"):
+            microphone = Periodic(lambda: m_service.listen(), 0.1)
+        elif opt in ("-f", "--frontend"):
+            print("No UI provided yet!")
+            sys.exit(2)
+            # microphone = GUI()
+
+    if microphone is None:
+        print('main.py -b')
+        print('main.py -f')
+        sys.exit()
 
     try:
         await p.start()
         await microphone.start()
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(120)
 
         await p.stop()
         await microphone.stop()
@@ -41,4 +68,4 @@ async def main():
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(main(sys.argv[1:]))
