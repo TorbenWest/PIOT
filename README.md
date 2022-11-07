@@ -15,5 +15,4 @@
 1. pip3 install mysql-connector-python==8.0.29
 2. pip install pybluez
 3. pip install pyyaml
-4. pip install gtts
-5. pip install SpeechRecognition
+4. pip install SpeechRecognition

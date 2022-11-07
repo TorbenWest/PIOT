@@ -3,7 +3,6 @@ from services.door_service import DoorService
 from services.console_service import print_microphone
 from services.database_service import DatabaseService
 
-import gtts
 import speech_recognition as sr
 import time
 
@@ -56,8 +55,7 @@ class MicrophoneService:
         return said.lower()
 
     def listen(self):
-        while True:
-            text = self.get_audio()
-            if "close" in text:
-                print_microphone("Heard word 'close'")
-            time.sleep(1)
+        input_text = self.get_audio()
+        for word in input_text.split():
+            self.match_word(word)
+        # time.sleep(1)
