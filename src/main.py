@@ -20,16 +20,17 @@ async def main():
 
     bt_service = BluetoothService(db_service)
     m_service = MicrophoneService(bt_service)
-    # m_service.listen()
+
     p = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
                  config_service.bluetooth_config.get('scan_interval'))
     microphone = Periodic(lambda: m_service.listen(), 1)
+
     try:
         await p.start()
         await microphone.start()
 
         await asyncio.sleep(60)
-        # m_service.match_word('close')
+
         await p.stop()
         await microphone.stop()
         connector.close_connection()

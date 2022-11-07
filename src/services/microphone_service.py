@@ -1,10 +1,9 @@
+import speech_recognition as sr
+
 from services.bluetooth_service import BluetoothService
-from services.door_service import DoorService
 from services.console_service import print_microphone
 from services.database_service import DatabaseService
-
-import speech_recognition as sr
-import time
+from services.door_service import DoorService
 
 
 class MicrophoneService:
@@ -38,24 +37,26 @@ class MicrophoneService:
             else:
                 print_microphone(f'No match with user {user_id}!')
 
-    def get_audio(self):
+    def listen(self) -> None:
+        if len(self.b_service.devices_in_range) == 0:
+            return
+
+        print_microphone('You can talk now:')
+        input_text = MicrophoneService._get_audio()
+        for word in input_text.split():
+            self.match_word(word)
+
+    @staticmethod
+    def _get_audio() -> str:
         r = sr.Recognizer()
         mic = sr.Microphone(device_index=1)
         with mic as source:
-            print("You can talk now")
             r.adjust_for_ambient_noise(source)
             audio = r.listen(source)
             said = ''
 
             try:
                 said = r.recognize_google(audio)
-                print(said)
             except Exception as e:
                 print("Exception: " + str(e))
         return said.lower()
-
-    def listen(self):
-        input_text = self.get_audio()
-        for word in input_text.split():
-            self.match_word(word)
-        # time.sleep(1)
