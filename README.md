@@ -17,4 +17,3 @@
 3. pip install pyyaml
 4. pip install gtts
 5. pip install SpeechRecognition
-6. pip install playsound
