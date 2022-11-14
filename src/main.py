@@ -7,6 +7,7 @@ from services.config_service import ConfigService
 from services.database_service import MySqlConnector, DatabaseService
 from services.microphone_service import MicrophoneService
 from periodic import Periodic
+from ui.main_ui import start_gui
 
 
 async def main(argv: list) -> None:
@@ -43,7 +44,8 @@ async def main(argv: list) -> None:
         elif opt in ("-b", "--backend"):
             microphone = Periodic(lambda: m_service.listen(), 0.1)
         elif opt in ("-f", "--frontend"):
-            print("No UI provided yet!")
+            # print("No UI provided yet!")
+            start_gui()
             sys.exit(2)
             # microphone = GUI()
 
