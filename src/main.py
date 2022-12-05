@@ -7,7 +7,7 @@ from services.config_service import ConfigService
 from services.database_service import MySqlConnector, DatabaseService
 from services.microphone_service import MicrophoneService
 from periodic import Periodic
-from ui.main_ui import start_gui
+from ui.main_ui import UIService
 
 
 async def main(argv: list) -> None:
@@ -31,8 +31,8 @@ async def main(argv: list) -> None:
     bt_service = BluetoothService(db_service)
     m_service = MicrophoneService(bt_service)
 
-    p = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
-                 config_service.bluetooth_config.get('scan_interval'))
+    bluetooth_periodic = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
+                                  config_service.bluetooth_config.get('scan_interval'))
 
     microphone = None
 
@@ -44,10 +44,21 @@ async def main(argv: list) -> None:
         elif opt in ("-b", "--backend"):
             microphone = Periodic(lambda: m_service.listen(), 0.1)
         elif opt in ("-f", "--frontend"):
-            # print("No UI provided yet!")
-            start_gui()
+            # TODO Let bluetooth service depend on ui service
+            ui_service = UIService(db_service, bt_service)
+            ui_periodic = Periodic(lambda: ui_service.start(), 10000)
+            try:
+                await bluetooth_periodic.start()
+                await ui_periodic.start()
+                await asyncio.sleep(300)
+                await ui_periodic.stop()
+                await bluetooth_periodic.stop()
+                connector.close_connection()
+            finally:
+                await ui_periodic.stop()
+                await bluetooth_periodic.stop()
+                connector.close_connection()
             sys.exit(2)
-            # microphone = GUI()
 
     if microphone is None:
         print('main.py -b')
@@ -55,17 +66,18 @@ async def main(argv: list) -> None:
         sys.exit()
 
     try:
-        await p.start()
+        await bluetooth_periodic.start()
         await microphone.start()
 
         await asyncio.sleep(120)
 
-        await p.stop()
+        await bluetooth_periodic.stop()
         await microphone.stop()
         connector.close_connection()
     finally:
-        await p.stop()
+        await bluetooth_periodic.stop()
         await microphone.stop()
+        connector.close_connection()
 
 
 if __name__ == '__main__':

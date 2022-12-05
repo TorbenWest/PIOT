@@ -87,6 +87,25 @@ class DatabaseService:
             }))
         return result
 
+    def username_exists(self, username: str) -> bool:
+        query: str = ("SELECT username "
+                      "FROM sd_user "
+                      "WHERE username = %s;")
+        rs: list = self._select(query, tuple([username]))
+        return False if len(rs) == 0 else True
+
+    def is_user_activated(self, user_id: int) -> bool:
+        query: str = ("SELECT is_activated "
+                      "FROM sd_user "
+                      "WHERE id = %s;")
+        rs: list = self._select(query, tuple([user_id]))
+
+        if len(rs) == 0:
+            print_database("Asking for account activation for an invalid user id: " % user_id)
+            return False
+
+        return rs[0][0]
+
     def get_user(self, username: str, plain_password: str) -> int:
         query: str = ("SELECT id "
                       "FROM sd_user "
