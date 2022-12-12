@@ -5,8 +5,8 @@ from services.database_service import DatabaseService
 
 
 class BluetoothService:
-    devices_in_range: list = []
-    devices_in_range_registrable: list = []
+    devices_in_range: list[dict[str, str]] = []
+    devices_in_range_registrable: list[dict[str, str]] = []
 
     def __init__(self, service: DatabaseService) -> None:
         self.db_service: DatabaseService = service

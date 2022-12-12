@@ -1,3 +1,5 @@
+from typing import Union
+
 import PySimpleGUI as sg
 from PySimpleGUI import Button, Text
 
@@ -32,7 +34,7 @@ class UIService:
 
             if event == '-SETTINGS-':
                 print('Settings')
-                self.login_window(lambda x: x)
+                self.login_window(self.settings_window)
 
             if event == '-USERS-':
                 print('Users')
@@ -63,7 +65,7 @@ class UIService:
             [self.get_text('Password'), self.get_text('Close command')],
             [sg.Input(key='PASSWORD'), sg.Input(key='CLOSE_COMMAND')],
             [self.get_text('Bluetooth Device'), self.get_text('Lock command')],
-            [sg.Combo(key='BD_ADDRESS', values=names), sg.Input(key='LOCK_COMMAND')],
+            [sg.Combo(key='BD_ADDRESS', values=names, size=(43, 1), readonly=True), sg.Input(key='LOCK_COMMAND')],
             [self.get_text('Unlock command')],
             [sg.Input(key='UNLOCK_COMMAND')],
             [sg.Submit(), sg.Cancel()]
@@ -80,21 +82,22 @@ class UIService:
                 password = values['PASSWORD']
                 device_name = values['BD_ADDRESS']
 
+                # TODO Make check class or method
                 if not 3 < len(username) < 16:
                     sg.popup("Username length is invalid!")
-                    break
+                    continue
 
                 if self.db_service.username_exists(username):
                     sg.popup("Username already used!")
-                    break
+                    continue
 
                 if len(password) < 8:
                     sg.popup("Password is too short!")
-                    break
+                    continue
 
                 if self.db_service.bd_addr_exists(device_name):
                     sg.popup("Devices already used by another account!")
-                    break
+                    continue
 
                 bd_addr: str = ''
                 for device in devices:
@@ -104,12 +107,100 @@ class UIService:
 
                 if len(bd_addr) == 0:
                     sg.popup("Registration failed")
-                    break
+                    continue
 
                 self.db_service.insert_user((username, password, bd_addr),
                                             (values['OPEN_COMMAND'], values['CLOSE_COMMAND'],
                                              values['LOCK_COMMAND'], values['UNLOCK_COMMAND']))
+                self.bt_service.devices_in_range_registrable.remove(dict({'name': device_name, 'bd_addr': bd_addr}))
+                self.bt_service.devices_in_range.append(dict({'name': device_name, 'bd_addr': bd_addr}))
                 sg.popup("User created!")
+            break
+        window.close()
+
+    # TODO Make a bluetooth controller
+    def _get_bluetooth_device_entry(self) -> Union[dict[str, str], bool]:
+        user = self.db_service.get_user(self.user_id)
+        user_bd_name = None
+
+        for device in self.bt_service.devices_in_range.copy():
+            if device.get('bd_addr') == user.get('bd_addr'):
+                user_bd_name = device.get('name')
+
+        if user_bd_name is None:
+            sg.popup("Please activate Bluetooth on your device and keep it nearby!")
+            return False
+
+        return dict({'name': user_bd_name, 'bd_addr': user.get('bd_addr')})
+
+    def settings_window(self):
+        devices: list = self.bt_service.devices_in_range_registrable.copy()
+        user = self.db_service.get_user(self.user_id)
+        device_entry = self._get_bluetooth_device_entry()
+
+        if not device_entry:
+            return
+
+        devices.append(device_entry)
+        names: list = [devices[i].get('name') for i in range(len(devices))]
+
+        _layout_register = [
+            [self.get_text('Username'), self.get_text('Open command')],
+            [sg.Input(key='USER', default_text=user.get('username')),
+             sg.Input(key='OPEN_COMMAND', default_text=user.get('cmd_open'))],
+            [self.get_text('Password'), self.get_text('Close command')],
+            [sg.Input(key='PASSWORD'), sg.Input(key='CLOSE_COMMAND', default_text=user.get('cmd_close'))],
+            [self.get_text('Bluetooth Device'), self.get_text('Lock command')],
+            [sg.Combo(key='BD_ADDRESS', values=names, size=(43, 1), default_value=device_entry.get('name'),
+                      readonly=True),
+             sg.Input(key='LOCK_COMMAND', default_text=user.get('cmd_lock'))],
+            [self.get_text('Unlock command')],
+            [sg.Input(key='UNLOCK_COMMAND', default_text=user.get('cmd_unlock'))],
+            [sg.Submit(), sg.Cancel()]
+        ]
+
+        window = sg.Window(title='Login', layout=_layout_register)
+
+        while True:
+            event, values = window.read()
+            if event in (sg.WINDOW_CLOSED, "Cancel"):
+                break
+            elif event == "Submit":
+                username = values['USER']
+                password = values['PASSWORD']
+                device_name = values['BD_ADDRESS']
+
+                if not username == user.get('username'):
+                    if not 3 < len(username) < 16:
+                        sg.popup("Username length is invalid!")
+                        continue
+
+                    if self.db_service.username_exists(username):
+                        sg.popup("Username already used!")
+                        continue
+
+                if len(password) < 8:
+                    sg.popup("Password is too short!")
+                    continue
+
+                if self.db_service.bd_addr_exists(device_name):
+                    sg.popup("Devices already used by another account!")
+                    continue
+
+                bd_addr: str = ''
+                for device in devices:
+                    if device.get('name') == device_name:
+                        bd_addr = device.get('bd_addr')
+                        break
+
+                if len(bd_addr) == 0:
+                    sg.popup("Updating failed")
+                    continue
+
+                self.db_service.update_user(self.user_id, (username, password, bd_addr),
+                                            (values['OPEN_COMMAND'], values['CLOSE_COMMAND'],
+                                             values['LOCK_COMMAND'], values['UNLOCK_COMMAND']))
+                sg.popup("User updated!")
             break
         window.close()
 
@@ -130,7 +221,7 @@ class UIService:
                 window.close()
                 return
             elif event == "Submit":
-                self.user_id = self.db_service.get_user(values['LOGIN_USERNAME'], values['LOGIN_PW'])
+                self.user_id = self.db_service.get_user_id(values['LOGIN_USERNAME'], values['LOGIN_PW'])
 
                 if self.user_id == -1:
                     sg.popup("Invalid login. Try again!")
@@ -154,7 +245,14 @@ class UIService:
             if event in (sg.WINDOW_CLOSED, "Cancel"):
                 break
             elif event == "Submit":
+                device_entry = self._get_bluetooth_device_entry()
+
+                if not device_entry:
+                    return
+
                 self.db_service.delete_user(self.user_id)
+                self.bt_service.devices_in_range.remove(device_entry)
+                self.bt_service.devices_in_range_registrable.append(device_entry)
             break
         window.close()
 

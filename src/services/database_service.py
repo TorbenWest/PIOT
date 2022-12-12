@@ -102,17 +102,38 @@ class DatabaseService:
 
         if len(rs) == 0:
             print_database("Asking for account activation for an invalid user id: " % user_id)
-            return False
+            raise UserNotExistsError(user_id)
 
         return rs[0][0]
 
-    def get_user(self, username: str, plain_password: str) -> int:
+    def get_user_id(self, username: str, plain_password: str) -> int:
         query: str = ("SELECT id "
                       "FROM sd_user "
                       "WHERE username = %s "
                       "AND hashed_password = %s;")
         rs: list = self._select(query, (username, DatabaseService.hash_password(plain_password)))
         return -1 if len(rs) == 0 else rs[0][0]
+
+    def get_user(self, user_id: int) -> dict[str, str]:
+        query: str = ("SELECT id, username, bd_addr, is_activated, cmd_open, cmd_close, cmd_lock, cmd_unlock "
+                      "FROM sd_user "
+                      "INNER JOIN sd_user_commands suc on sd_user.id = suc.user_id "
+                      "WHERE id = %s;")
+        rs: list = self._select(query, tuple([user_id]))
+
+        if len(rs) == 0:
+            raise UserNotExistsError(user_id)
+
+        return dict({
+            'user_id': rs[0][0],
+            'username': rs[0][1],
+            'bd_addr': rs[0][2],
+            'is_activated': rs[0][3],
+            'cmd_open': rs[0][4],
+            'cmd_close': rs[0][5],
+            'cmd_lock': rs[0][6],
+            'cmd_unlock': rs[0][7],
+        })
 
     def get_user_bd_address(self, user_id: int) -> str:
         query: str = ("SELECT bd_addr "
@@ -170,9 +191,26 @@ class DatabaseService:
                       "WHERE id = %s;")
         self._commit(query, (command, value, user_id))
 
+    # Example usage: update_user((username, password, bd_addr), (cmd_open, cmd_close, cmd_close, cmd_unlock))
+    def update_user(self, user_id: int, data_user: tuple, data_command: tuple) -> None:
+        # Define queries
+        update_user: str = ("UPDATE sd_user "
+                            "SET username = %s, hashed_password = %s, bd_addr = %s "
+                            "WHERE id = %s;")
+        update_commands: str = ("UPDATE sd_user_commands "
+                                "SET cmd_open = %s, cmd_close = %s, cmd_lock = %s, cmd_unlock = %s "
+                                "WHERE user_id = %s;")
+
+        # Hashing the password
+        data_user_list: list = list(data_user)
+        data_user_list[1]: str = DatabaseService.hash_password(data_user_list[1])
+
+        # Updating entries
+        self._commit(update_user, tuple(data_user_list) + (user_id,))
+        self._commit(update_commands, data_command + (user_id,))
+
     def delete_user(self, user_id: int) -> None:
-        query: str = ("DELETE FROM sd_user "
-                      "WHERE id = %s;")
+        query: str = "DELETE FROM sd_user WHERE id = %s;"
         self._commit(query, tuple([user_id]))
 
     # Example usage: insert_user((username, password, bd_addr), (cmd_open, cmd_close, cmd_close, cmd_unlock))

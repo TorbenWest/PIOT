@@ -50,7 +50,7 @@ async def main(argv: list) -> None:
             try:
                 await bluetooth_periodic.start()
                 await ui_periodic.start()
-                await asyncio.sleep(300)
+                await asyncio.sleep(30)
                 await ui_periodic.stop()
                 await bluetooth_periodic.stop()
                 connector.close_connection()
