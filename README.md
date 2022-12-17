@@ -16,3 +16,4 @@
 2. pip install pybluez
 3. pip install pyyaml
 4. pip install SpeechRecognition
+5. pip install customtkinter
