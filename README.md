@@ -17,3 +17,4 @@
 3. pip install pyyaml
 4. pip install SpeechRecognition
 5. pip install customtkinter
+6. pip install python-dotenv

@@ -1,9 +1,9 @@
 mysql:
-  database: 'smartdoor'
-  user: 'smartdoor'
-  password: 'c$7^tvMaT7q51tZ0kY0w'
-  host: '45.142.115.34'
-  port: '3306'
+  database: ${MARIADB_DATABASE}
+  user: ${MARIADB_USER}
+  password: ${MARIADB_SMARTDOOR_PASSWORD}
+  host: ${MARIADB_HOST}
+  port: ${MARIADB_PORT}
   raise_on_warnings: false
 
 bluetooth:

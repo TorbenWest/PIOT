@@ -6,5 +6,6 @@ pip3 install pybluez
 pip3 install pyyaml
 pip3 install SpeechRecognition
 pip3 install customtkinter
+pip3 install python-dotenv
 
 printf "Installation done\n"

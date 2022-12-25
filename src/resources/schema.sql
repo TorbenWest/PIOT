@@ -24,3 +24,13 @@ CREATE TABLE IF NOT EXISTS sd_user_interaction_log
     cmd_timestamp timestamp    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES sd_user (id) ON DELETE CASCADE
 );
+
+CREATE TRIGGER timestamp_check
+    BEFORE INSERT
+    ON sd_user_interaction_log
+    FOR EACH ROW
+BEGIN
+    IF NEW.cmd_timestamp > CURDATE() THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid date!';
+    END IF;
+END

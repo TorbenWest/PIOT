@@ -45,11 +45,21 @@ class Windows:
         # Button login
         button_login = customtkinter.CTkButton(window, text='Login', width=70, command=lambda: app.controller
                                                .login_user(app, window, entry_username.get(), entry_password.get(),
-                                                           navigate_to))
+                                                           navigate_to, Windows.login_failed))
         button_login.grid(row=2, column=0, padx=100, pady=(0, 5), sticky='e')
 
         # Button cancel
         cancel_button(root=window, row=2, column=0, padding_x=20)
+
+    @staticmethod
+    def login_failed(app):
+        window = create_toplevel(app, 280, 150, 'Login failed')
+
+        customtkinter.CTkLabel(window, text='Incorrect password or username!', width=30, font=font_label_frame_header,
+                               height=25, corner_radius=7, wraplength=250) \
+            .grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 5), sticky='w')
+
+        cancel_button(root=window, text='Ok', row=1, padding_x=10)
 
     @staticmethod
     def register(app):
