@@ -1,3 +1,5 @@
+from typing import Union
+
 import bluetooth
 
 from services.console_service import print_bluetooth
@@ -32,6 +34,27 @@ class BluetoothService:
         for addr, name in devices:
             if BluetoothService._convert_to_dict(name, addr) not in self.devices_in_range:
                 self._add_device(name, addr)
+
+    def register(self, device_name: str, bd_addr: str) -> None:
+        self.devices_in_range_registrable.remove(self._convert_to_dict(device_name, bd_addr))
+        self.devices_in_range.append(self._convert_to_dict(device_name, bd_addr))
+
+    def delete(self, device_entry: dict[str, str]) -> None:
+        self.devices_in_range.remove(device_entry)
+        self.devices_in_range_registrable.append(device_entry)
+
+    def get_bluetooth_device_entry(self, user_id: int) -> Union[dict[str, str], bool]:
+        user = self.db_service.get_user(user_id)
+        user_bd_name = None
+
+        for device in self.devices_in_range.copy():
+            if device.get('bd_addr') == user.get('bd_addr'):
+                user_bd_name = device.get('name')
+
+        if user_bd_name is None:
+            return False
+
+        return self._convert_to_dict(user_bd_name, user.get('bd_addr'))
 
     def _add_device(self, name: str, bd_address: str) -> None:
         entry: dict = BluetoothService._convert_to_dict(name, bd_address)

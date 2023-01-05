@@ -2,7 +2,7 @@ import asyncio
 import getopt
 import sys
 
-from periodic import Periodic
+from periodic import PeriodicAsync, PeriodicSync
 from services.bluetooth_service import BluetoothService
 from services.config_service import ConfigService
 from services.database_service import MySqlConnector, DatabaseService
@@ -10,19 +10,19 @@ from services.microphone_service import MicrophoneService
 from ui.app import App
 
 
-def frontend(event_loop):
+async def frontend():
     config_service = ConfigService()
     connector = MySqlConnector(config_service.database_config)
     db_service = DatabaseService(connector.con)
     bt_service = BluetoothService(db_service)
-    bluetooth_periodic = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
-                                  config_service.bluetooth_config.get('scan_interval'))
+    bluetooth_periodic = PeriodicSync(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
+                                      config_service.bluetooth_config.get('scan_interval'))
 
-    # await bluetooth_periodic.start()
-    # await asyncio.sleep(30)
-    app = App(event_loop, bluetooth_periodic, db_service, connector)
-    # async_mainloop(app)
+    bluetooth_periodic.start()
+    app = App(bt_service, db_service)
     app.mainloop()
+    bluetooth_periodic.stop()
+    connector.close_connection()
 
 
 async def backend():
@@ -32,10 +32,11 @@ async def backend():
     bt_service = BluetoothService(db_service)
     m_service = MicrophoneService(bt_service)
 
-    bluetooth_periodic = Periodic(lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
-                                  config_service.bluetooth_config.get('scan_interval'))
+    bluetooth_periodic = PeriodicAsync(
+        lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
+        config_service.bluetooth_config.get('scan_interval'))
 
-    microphone = Periodic(lambda: m_service.listen(), 0.1)
+    microphone = PeriodicAsync(lambda: m_service.listen(), 0.1)
 
     try:
         await bluetooth_periodic.start()
@@ -72,5 +73,4 @@ if __name__ == '__main__':
             loop.run_until_complete(backend())
         elif opt in ("-f", "--frontend"):
             loop = asyncio.get_event_loop()
-            # loop.run_until_complete(frontend(loop))
-            frontend(loop)
+            loop.run_until_complete(frontend())

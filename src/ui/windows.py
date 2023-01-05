@@ -45,17 +45,17 @@ class Windows:
         # Button login
         button_login = customtkinter.CTkButton(window, text='Login', width=70, command=lambda: app.controller
                                                .login_user(app, window, entry_username.get(), entry_password.get(),
-                                                           navigate_to, Windows.login_failed))
+                                                           navigate_to))
         button_login.grid(row=2, column=0, padx=100, pady=(0, 5), sticky='e')
 
         # Button cancel
         cancel_button(root=window, row=2, column=0, padding_x=20)
 
     @staticmethod
-    def login_failed(app):
-        window = create_toplevel(app, 280, 150, 'Login failed')
+    def popup(app, title: str, text: str):
+        window = create_toplevel(app, 280, 150, title)
 
-        customtkinter.CTkLabel(window, text='Incorrect password or username!', width=30, font=font_label_frame_header,
+        customtkinter.CTkLabel(window, text=text, width=30, font=font_label_frame_header,
                                height=25, corner_radius=7, wraplength=250) \
             .grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 5), sticky='w')
 
@@ -115,9 +115,10 @@ class Windows:
                                                                 sticky='w')
 
         # Entry bluetooth device
-        # TODO Entries!!
+        devices: list = app.bt_service.devices_in_range_registrable.copy()
+        names: list = [devices[i].get('name') for i in range(len(devices))]
         entry_bluetooth_device = customtkinter.CTkOptionMenu(left_frame_login, dynamic_resizing=True,
-                                                             values=['Value 1', 'Value 2', 'Value Long Long Long'],
+                                                             values=names,
                                                              width=entry_width)
         entry_bluetooth_device.grid(row=6, column=0, padx=padding_x, pady=(0, 15), sticky='w')
         # - Left Frame - #
@@ -181,7 +182,13 @@ class Windows:
         entry_unlock.grid(row=8, column=0, padx=padding_x, pady=(0, 15), sticky='w')
 
         # Button submit
-        button_submit = customtkinter.CTkButton(window, text='Submit', width=70, command=lambda: print('Submit'))
+        commands = (entry_open.get(), entry_close.get(), entry_lock.get(), entry_unlock.get())
+        button_submit = customtkinter.CTkButton(window, text='Submit', width=70,
+                                                command=lambda: app.controller.register(app, window, devices,
+                                                                                        entry_username.get(),
+                                                                                        entry_password.get(),
+                                                                                        entry_bluetooth_device.get(),
+                                                                                        commands))
         button_submit.grid(row=10, column=0, padx=frame_padding_x, pady=(0, 5), sticky='ws')
 
         # Button cancel
@@ -189,19 +196,26 @@ class Windows:
 
     @staticmethod
     def delete(app):
-        Windows._pop_up_window(app, 'Are you sure you want to delete your account?', app.controller.delete)
+        window = create_toplevel(app, 280, 150, 'Confirmation')
+        Windows._pop_up_window(window, 'Are you sure you want to delete your account?',
+                               lambda: app.controller.delete(app, window))
 
     @staticmethod
     def settings(app):
         pass
 
+    # TODO Change dialog order
     @staticmethod
     def activate(app):
-        Windows._pop_up_window(app, 'Are you sure you want to activate your account?', app.controller.activate)
+        window = create_toplevel(app, 280, 150, 'Confirmation')
+        Windows._pop_up_window(window, 'Are you sure you want to activate your account?',
+                               lambda: app.controller.activate(app, window))
 
     @staticmethod
     def deactivate(app):
-        Windows._pop_up_window(app, 'Are you sure you want to deactivate your account?', app.controller.deactivate)
+        window = create_toplevel(app, 280, 150, 'Confirmation')
+        Windows._pop_up_window(window, 'Are you sure you want to deactivate your account?',
+                               lambda: app.controller.deactivate(app, window))
 
     @staticmethod
     def users(app):
@@ -254,9 +268,7 @@ class Windows:
         cancel_button(root=window, text='Back', row=3, padding_x=frame_padding_x)
 
     @staticmethod
-    def _pop_up_window(app, text: str, action):
-        window = create_toplevel(app, 280, 150, 'Confirmation')
-
+    def _pop_up_window(window, text: str, action):
         # Label to confirm
         customtkinter.CTkLabel(window, text=text, width=30, font=font_label_frame_header,
                                height=25, corner_radius=7, wraplength=250) \
