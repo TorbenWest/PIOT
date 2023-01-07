@@ -10,6 +10,7 @@ from services.microphone_service import MicrophoneService
 from ui.app import App
 
 
+# TODO Event system?
 async def frontend():
     config_service = ConfigService()
     connector = MySqlConnector(config_service.database_config)

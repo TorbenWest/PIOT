@@ -2,7 +2,9 @@
 
 import customtkinter
 
-from ui.utils import cancel_button, create_toplevel, font_label_window_header, font_label_form, font_label_frame_header
+from ui.utils import cancel_button, create_toplevel,\
+    font_label_window_header, font_label_form,\
+    font_label_frame_header, font_textbox
 
 
 class Windows:
@@ -204,7 +206,6 @@ class Windows:
     def settings(app):
         pass
 
-    # TODO Change dialog order
     @staticmethod
     def activate(app):
         window = create_toplevel(app, 280, 150, 'Confirmation')
@@ -243,10 +244,9 @@ class Windows:
                                height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 20))
 
         # Textbox activated users
-        textbox_activated_users = customtkinter.CTkTextbox(left_frame_login, width=200, state='disabled')
+        textbox_activated_users = customtkinter.CTkTextbox(left_frame_login, width=200, font=font_textbox)
         textbox_activated_users.grid(row=1, column=0, padx=20, pady=20, sticky='nsew')
-        # TODO Load accounts
-        # textbox_activated_users.insert("0.0", "new text to insert")
+        app.controller.users(textbox_activated_users, True)
 
         # - Right Frame - #
         right_frame_login = customtkinter.CTkFrame(master=window, corner_radius=10, width=frame_width)
@@ -259,10 +259,9 @@ class Windows:
                                height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 20))
 
         # Textbox activated users
-        textbox_deactivated_users = customtkinter.CTkTextbox(right_frame_login, width=200, state='disabled')
+        textbox_deactivated_users = customtkinter.CTkTextbox(right_frame_login, width=200, font=font_textbox)
         textbox_deactivated_users.grid(row=1, column=0, padx=20, pady=20, sticky='nsew')
-        # TODO Load accounts
-        # textbox_deactivated_users.insert("0.0", "new text to insert")
+        app.controller.users(textbox_deactivated_users, False)
 
         # Button back
         cancel_button(root=window, text='Back', row=3, padding_x=frame_padding_x)

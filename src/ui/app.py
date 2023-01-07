@@ -2,7 +2,7 @@ import customtkinter
 
 from bluetooth_service import BluetoothService
 from database_service import DatabaseService
-from ui.ui_controller import UIController
+from ui.windows_controller import UIController
 from ui.utils import center_window
 from ui.windows import Windows
 

@@ -4,6 +4,7 @@ import customtkinter
 from customtkinter import CTkButton, CTkToplevel, CTk
 
 font_label_form: tuple[str, int] = ('Roboto', 20)
+font_textbox: tuple[str, int] = ('Roboto', 20)
 font_label_frame_header: tuple[str, int] = ('Roboto', 25)
 font_label_window_header: tuple[str, int] = ('Roboto', 35)
 

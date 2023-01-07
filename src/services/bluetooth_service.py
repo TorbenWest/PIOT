@@ -7,7 +7,10 @@ from services.database_service import DatabaseService
 
 
 class BluetoothService:
+    """This list contains all devices that are related to an account and nearby!"""
     devices_in_range: list[dict[str, str]] = []
+
+    """This list contains all devices that are not related to an account and nearby!"""
     devices_in_range_registrable: list[dict[str, str]] = []
 
     def __init__(self, service: DatabaseService) -> None:
@@ -16,21 +19,25 @@ class BluetoothService:
     # https://github.com/pybluez/pybluez
     def scan(self, duration: int) -> None:
         print_bluetooth('Scanning for bluetooth devices...')
+        # All devices that are nearby
         devices = bluetooth.discover_devices(duration=duration, lookup_names=True)
 
+        # Remove device from "devices_in_range" if it was added before but not to far away
         for current in self.devices_in_range:
             if not any(device[0] == current.get('bd_addr') for device in devices):
                 self._remove_device(current.get('name'), current.get('bd_addr'))
 
+        # Remove device from "devices_in_range_registrable" if it was added before but not to far away
         for current in self.devices_in_range_registrable:
             if not any(device[0] == current.get('bd_addr') for device in devices):
-                self.devices_in_range.remove(BluetoothService._convert_to_dict(current.get('name'),
-                                                                               current.get('bd_addr')))
-
+                self.devices_in_range_registrable.remove(BluetoothService._convert_to_dict(current.get('name'),
+                                                                                           current.get('bd_addr')))
+        # If no devices are nearby; nothing to add
         if len(devices) == 0:
             print_bluetooth('No new device found!')
             return
 
+        # Check whether new devices are nearby
         for addr, name in devices:
             if BluetoothService._convert_to_dict(name, addr) not in self.devices_in_range:
                 self._add_device(name, addr)
@@ -79,5 +86,5 @@ class BluetoothService:
         print_bluetooth('\tBD address: %s' % bd_address)
 
     @staticmethod
-    def _convert_to_dict(name: str, bd_address: str) -> dict:
+    def _convert_to_dict(name: str, bd_address: str) -> dict[str, str]:
         return dict({'name': name, 'bd_addr': bd_address})

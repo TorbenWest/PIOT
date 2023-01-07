@@ -71,7 +71,7 @@ class DatabaseService:
         rs: list = self._select(query, tuple([bd_addr]))
         return len(rs) == 1
 
-    def get_all_users(self) -> list:
+    def get_all_users(self) -> list[dict]:
         query: str = "SELECT id, username, bd_addr, is_activated FROM sd_user;"
         rs: list = self._select(query, tuple())
         if len(rs) == 0:
@@ -192,7 +192,8 @@ class DatabaseService:
         self._commit(query, (command, value, user_id))
 
     # Example usage: update_user((username, password, bd_addr), (cmd_open, cmd_close, cmd_close, cmd_unlock))
-    def update_user(self, user_id: int, data_user: tuple, data_command: tuple) -> None:
+    def update_user(self, user_id: int, data_user: tuple[str, str, str],
+                    data_command: tuple[str, str, str, str]) -> None:
         # Define queries
         update_user: str = ("UPDATE sd_user "
                             "SET username = %s, hashed_password = %s, bd_addr = %s "
