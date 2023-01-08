@@ -1,5 +1,3 @@
-from typing import Union
-
 from customtkinter import CTk, CTkTextbox
 
 from bluetooth_service import BluetoothService
@@ -27,26 +25,54 @@ class UIController:
             window.destroy()
             navigate_to(root)
 
-    def register(self, root: CTk, window: CTk, devices: list, username: str, password: str,
-                 device_name: str, commands: tuple[str, str, str, str]) -> None:
-        bd_addr = self._user_data_validation(root, devices, username, password, device_name, commands, False)
+    def user_ctk(self, root: CTk, window: CTk, devices: list, username: str, password: str,
+                 device_name: str, commands: tuple[str, str, str, str], update: bool) -> None:
+        """This method handles the register and settings functionality."""
+        user = self.db_service.get_user(self.user_id) if update else None
 
-        if bd_addr is not None:
-            self.db_service.insert_user((username, password, bd_addr), commands)
-            self.bt_service.register(device_name, bd_addr)
-            window.destroy()
-            Windows.popup(root, 'Registration Success', 'Your user account was created successfully!')
+        if not 3 < len(username) < 16:
+            Windows.popup(root, 'Username invalid', 'Username length is invalid!')
+            return
 
-    def settings(self, root: CTk, window: CTk, devices: list, username: str, password: str,
-                 device_name: str, commands: tuple[str, str, str, str]) -> None:
-        bd_addr = self._user_data_validation(root, devices, username, password, device_name, commands, True)
+        if (not update or update and not username == user.get('username')) \
+                and self.db_service.username_exists(username):
+            Windows.popup(root, 'Username invalid', 'Username already used!')
+            return
 
-        if bd_addr is not None:
+        if len(password) < 8:
+            Windows.popup(root, 'Password invalid', 'Password is too short!')
+            return
+
+        if self.db_service.bd_addr_exists(device_name):
+            Windows.popup(root, 'Device invalid', 'Devices already used by another account!')
+            return
+
+        bd_addr: str = ''
+        for device in devices:
+            if device.get('name') == device_name:
+                bd_addr = device.get('bd_addr')
+                break
+
+        if len(bd_addr) == 0:
+            Windows.popup(root, 'Device invalid', 'Devices could not be determined!')
+            return
+
+        for command in commands:
+            if len(command) == 0 or command.isspace():
+                Windows.popup(root, 'Command invalid', 'Please fill out all command entries!')
+                return
+
+        if update:
             self.db_service.update_user(self.user_id, (username, password, bd_addr), commands)
             # TODO Update Bluetooth
             # self.bt_service.register(device_name, bd_addr)
             window.destroy()
             Windows.popup(root, 'Update Success', 'Your user account was updated successfully!')
+        else:
+            self.db_service.insert_user((username, password, bd_addr), commands)
+            self.bt_service.register(device_name, bd_addr)
+            window.destroy()
+            Windows.popup(root, 'Registration Success', 'Your user account was created successfully!')
 
     def activate(self, root: CTk, window: CTk) -> None:
         if self.db_service.is_user_activated(self.user_id):
@@ -87,41 +113,3 @@ class UIController:
 
         # If textbox is disabled, the "insert" function will also not work
         textbox.configure(state='disabled')
-
-    def _user_data_validation(self, root: CTk, devices: list, username: str, password: str, device_name: str,
-                              commands: tuple[str, str, str, str], update: bool) -> Union[None, str]:
-        user = self.db_service.get_user(self.user_id) if update else None
-
-        if not 3 < len(username) < 16:
-            Windows.popup(root, 'Username invalid', 'Username length is invalid!')
-            return None
-
-        if (not update or update and not username == user.get('username')) \
-                and self.db_service.username_exists(username):
-            Windows.popup(root, 'Username invalid', 'Username already used!')
-            return None
-
-        if len(password) < 8:
-            Windows.popup(root, 'Password invalid', 'Password is too short!')
-            return None
-
-        if self.db_service.bd_addr_exists(device_name):
-            Windows.popup(root, 'Device invalid', 'Devices already used by another account!')
-            return None
-
-        bd_addr: str = ''
-        for device in devices:
-            if device.get('name') == device_name:
-                bd_addr = device.get('bd_addr')
-                break
-
-        if len(bd_addr) == 0:
-            Windows.popup(root, 'Device invalid', 'Devices could not be determined!')
-            return None
-
-        for command in commands:
-            if len(command) == 0 or command.isspace():
-                Windows.popup(root, 'Command invalid', 'Please fill out all command entries!')
-                return None
-
-        return bd_addr

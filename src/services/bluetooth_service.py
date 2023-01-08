@@ -68,7 +68,7 @@ class BluetoothService:
         print_bluetooth('Found new device \"%s\"!' % name)
 
         if not self.db_service.bd_addr_exists(bd_address):
-            if entry not in self.devices_in_range:
+            if entry not in self.devices_in_range_registrable:
                 self.devices_in_range_registrable.append(entry)
             print_bluetooth('\tDevice not registered!')
             return

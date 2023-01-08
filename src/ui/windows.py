@@ -2,8 +2,8 @@
 
 import customtkinter
 
-from ui.utils import cancel_button, create_toplevel,\
-    font_label_window_header, font_label_form,\
+from ui.utils import cancel_button, create_toplevel, \
+    font_label_window_header, font_label_form, \
     font_label_frame_header, font_textbox
 
 
@@ -65,6 +65,33 @@ class Windows:
 
     @staticmethod
     def register(app):
+        Windows._user_ctk(app)
+
+    @staticmethod
+    def settings(app):
+        Windows._user_ctk(app, user=app.db_service.get_user(app.controller.user_id))
+
+    @staticmethod
+    def _user_ctk(app, user=None) -> None:
+        """
+        This method handles the register and settings functionality.
+        """
+        devices: list = app.bt_service.devices_in_range_registrable.copy()
+        device_entry = None
+
+        if user is not None:
+            device_entry = app.bt_service.get_bluetooth_device_entry(user.get('user_id'))
+            if not device_entry:
+                Windows.popup(app, 'Settings', 'Please activate Bluetooth on your device and keep it nearby!')
+                return
+            devices.append(device_entry)
+
+        names: list = [devices[i].get('name') for i in range(len(devices))]
+
+        if len(names) == 0:
+            Windows.popup(app, 'Bluetooth devices', 'No Bluetooth devices found... Please activate your device!')
+            return
+
         entry_width: int = 250
         padding_x: int = 10
         frame_width: int = entry_width + 2 * padding_x
@@ -95,8 +122,7 @@ class Windows:
 
         # Entry username
         entry_username = customtkinter.CTkEntry(left_frame_login, placeholder_text='Enter Username', width=entry_width,
-                                                height=30,
-                                                border_width=2, corner_radius=10)
+                                                height=30, border_width=2, corner_radius=10)
         entry_username.grid(row=2, column=0, padx=padding_x, sticky='w')
 
         # Label password
@@ -106,8 +132,7 @@ class Windows:
 
         # Entry password
         entry_password = customtkinter.CTkEntry(left_frame_login, placeholder_text='Enter Password', width=entry_width,
-                                                height=30,
-                                                border_width=2, corner_radius=10, show='*')
+                                                height=30, border_width=2, corner_radius=10, show='*')
         entry_password.grid(row=4, column=0, padx=padding_x, sticky='w')
 
         # Label bluetooth device
@@ -117,11 +142,8 @@ class Windows:
                                                                 sticky='w')
 
         # Entry bluetooth device
-        devices: list = app.bt_service.devices_in_range_registrable.copy()
-        names: list = [devices[i].get('name') for i in range(len(devices))]
         entry_bluetooth_device = customtkinter.CTkOptionMenu(left_frame_login, dynamic_resizing=True,
-                                                             values=names,
-                                                             width=entry_width)
+                                                             values=names, width=entry_width)
         entry_bluetooth_device.grid(row=6, column=0, padx=padding_x, pady=(0, 15), sticky='w')
         # - Left Frame - #
 
@@ -183,14 +205,26 @@ class Windows:
                                               border_width=2, corner_radius=10)
         entry_unlock.grid(row=8, column=0, padx=padding_x, pady=(0, 15), sticky='w')
 
+        # Fill in values if "Settings" was selected
+        if user is not None:
+            entry_username.insert(0, user.get('username'))
+            entry_open.insert(0, user.get('cmd_open'))
+            entry_close.insert(0, user.get('cmd_close'))
+            entry_lock.insert(0, user.get('cmd_lock'))
+            entry_unlock.insert(0, user.get('cmd_unlock'))
+            entry_bluetooth_device.set(device_entry.get('name'))
+
         # Button submit
-        commands = (entry_open.get(), entry_close.get(), entry_lock.get(), entry_unlock.get())
         button_submit = customtkinter.CTkButton(window, text='Submit', width=70,
-                                                command=lambda: app.controller.register(app, window, devices,
+                                                command=lambda: app.controller.user_ctk(app, window, devices,
                                                                                         entry_username.get(),
                                                                                         entry_password.get(),
                                                                                         entry_bluetooth_device.get(),
-                                                                                        commands))
+                                                                                        (entry_open.get(),
+                                                                                         entry_close.get(),
+                                                                                         entry_lock.get(),
+                                                                                         entry_unlock.get()),
+                                                                                        user is not None))
         button_submit.grid(row=10, column=0, padx=frame_padding_x, pady=(0, 5), sticky='ws')
 
         # Button cancel
@@ -201,10 +235,6 @@ class Windows:
         window = create_toplevel(app, 280, 150, 'Confirmation')
         Windows._pop_up_window(window, 'Are you sure you want to delete your account?',
                                lambda: app.controller.delete(app, window))
-
-    @staticmethod
-    def settings(app):
-        pass
 
     @staticmethod
     def activate(app):

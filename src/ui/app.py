@@ -17,7 +17,8 @@ class App(customtkinter.CTk):
     def __init__(self, bt_service: BluetoothService, db_service: DatabaseService) -> None:
         super().__init__()
         self.bt_service = bt_service
-        self.controller = UIController(bt_service, db_service)
+        self.db_service = db_service
+        self.controller = UIController(self.bt_service, self.db_service)
 
         # async_handler(_run_async, lambda: self._start())
         # self._run_task(self._start)
