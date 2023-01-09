@@ -34,6 +34,9 @@ class ConfigService:
             self.bluetooth_config.__setitem__('scan_interval',
                                               int(self.bluetooth_config.get('scan_interval')))
 
+            print_config('Setup user interface config.')
+            self.ui_config = dict(config.get('user_interface'))
+
             print_config('Config loaded!')
 
     def _replace_env(self) -> None:

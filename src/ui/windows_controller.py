@@ -5,7 +5,6 @@ from database_service import DatabaseService
 from ui.windows import Windows
 
 
-# TODO Reset user id on cancel
 class UIController:
 
     def __init__(self, bt_service: BluetoothService, db_service: DatabaseService):
@@ -63,9 +62,11 @@ class UIController:
                 return
 
         if update:
+            if not bd_addr == user.get('bd_addr'):
+                old_device_entry = self.bt_service.get_bluetooth_device_entry(self.user_id)
+                self.bt_service.update(old_device_entry, device_name, bd_addr)
+
             self.db_service.update_user(self.user_id, (username, password, bd_addr), commands)
-            # TODO Update Bluetooth
-            # self.bt_service.register(device_name, bd_addr)
             window.destroy()
             Windows.popup(root, 'Update Success', 'Your user account was updated successfully!')
         else:
@@ -109,7 +110,7 @@ class UIController:
             textbox.insert('0.0', 'No user found!')
         else:
             for i, user in enumerate(users):
-                textbox.insert(f'{i}.0', user.get('username'))
+                textbox.insert(f'{i}.0', user.get('username') + '\n')
 
         # If textbox is disabled, the "insert" function will also not work
         textbox.configure(state='disabled')

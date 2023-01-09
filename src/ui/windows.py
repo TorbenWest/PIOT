@@ -53,6 +53,7 @@ class Windows:
         # Button cancel
         cancel_button(root=window, row=2, column=0, padding_x=20)
 
+    # TODO Make it resizable
     @staticmethod
     def popup(app, title: str, text: str):
         window = create_toplevel(app, 280, 150, title)

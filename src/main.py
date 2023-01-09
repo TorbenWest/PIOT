@@ -10,7 +10,6 @@ from services.microphone_service import MicrophoneService
 from ui.app import App
 
 
-# TODO Event system?
 async def frontend():
     config_service = ConfigService()
     connector = MySqlConnector(config_service.database_config)
@@ -20,7 +19,7 @@ async def frontend():
                                       config_service.bluetooth_config.get('scan_interval'))
 
     bluetooth_periodic.start()
-    app = App(bt_service, db_service)
+    app = App(bt_service, db_service, config_service)
     app.mainloop()
     bluetooth_periodic.stop()
     connector.close_connection()

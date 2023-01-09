@@ -1,27 +1,25 @@
 import customtkinter
 
 from bluetooth_service import BluetoothService
+from config_service import ConfigService
 from database_service import DatabaseService
-from ui.windows_controller import UIController
 from ui.utils import center_window
 from ui.windows import Windows
-
-# TODO Put in config file
-customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
+from ui.windows_controller import UIController
 
 
 # https://github.com/TomSchimansky/CustomTkinter
 # https://www.youtube.com/watch?v=vEfrIpj2NNw
 class App(customtkinter.CTk):
-    def __init__(self, bt_service: BluetoothService, db_service: DatabaseService) -> None:
+    def __init__(self, bt_service: BluetoothService, db_service: DatabaseService, c_service: ConfigService) -> None:
         super().__init__()
+        customtkinter.set_appearance_mode(c_service.ui_config.get('appearance_mode'))
+        customtkinter.set_default_color_theme(c_service.ui_config.get('color_theme'))
+
         self.bt_service = bt_service
         self.db_service = db_service
         self.controller = UIController(self.bt_service, self.db_service)
 
-        # async_handler(_run_async, lambda: self._start())
-        # self._run_task(self._start)
         app_width = 700
         app_height = 500
 

@@ -11,3 +11,9 @@ bluetooth:
   discover_duration: 10
   # The interval in which the scan method will be called. Given in seconds.
   scan_interval: 20
+
+user_interface:
+  # The appearance mode for all user interfaces. Can be 'Light', 'Dark', or 'System'.
+  appearance_mode: 'Dark'
+  # The color theme for all user interfaces. Can be 'blue', 'green', or 'dark-blue'.
+  color_theme: 'dark-blue'

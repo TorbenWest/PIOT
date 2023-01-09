@@ -46,6 +46,10 @@ class BluetoothService:
         self.devices_in_range_registrable.remove(self._convert_to_dict(device_name, bd_addr))
         self.devices_in_range.append(self._convert_to_dict(device_name, bd_addr))
 
+    def update(self, old_device_entry: dict[str, str], new_device_name: str, new_bd_addr: str) -> None:
+        self.register(new_device_name, new_bd_addr)
+        self.delete(old_device_entry)
+
     def delete(self, device_entry: dict[str, str]) -> None:
         self.devices_in_range.remove(device_entry)
         self.devices_in_range_registrable.append(device_entry)
