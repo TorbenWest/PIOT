@@ -7,5 +7,6 @@ pip3 install pyyaml
 pip3 install SpeechRecognition
 pip3 install customtkinter
 pip3 install python-dotenv
+pip3 install Pillow
 
 printf "Installation done\n"

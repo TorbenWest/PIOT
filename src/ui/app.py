@@ -6,7 +6,7 @@ import customtkinter
 from bluetooth_service import BluetoothService
 from config_service import ConfigService
 from database_service import DatabaseService
-from ui.utils import center_window
+from ui.utils import center_window, generate_image
 from ui.windows import Windows
 from ui.windows_controller import UIController
 
@@ -39,12 +39,20 @@ class App(customtkinter.CTk):
         self.progressbar_frame.grid(sticky="nsew", rowspan=2, columnspan=2, padx=15, pady=20)
         self.progressbar_frame.grid_rowconfigure(0, weight=1)
         self.progressbar = customtkinter.CTkProgressBar(self.progressbar_frame)
-        self.progressbar.place(relx=0.1, rely=0.8, relwidth=0.80, relheight=0.05)
+
+        # Todo adapt to other color theme
+        logo_img = customtkinter.CTkImage(generate_image('logo_dark_blue_high.png'), size=(500, 300))
+        self.button_image = customtkinter.CTkButton(master=self.progressbar_frame, hover=False, state='disabled',
+                                                    text='', image=logo_img, fg_color='#212121')
+        self.button_image.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.6)
+
+        self.progressbar.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.1)
         self.protocol('WM_DELETE_WINDOW', self.destroy)
 
         self._thread = threading.Thread(target=self._update_progressbar)
         self._thread.start()
 
+    # TODO Add percentage label in center
     def _update_progressbar(self):
         seconds: int = self.c_service.bluetooth_config.get('discover_duration') + 5
 

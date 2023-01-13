@@ -18,3 +18,4 @@
 4. pip install SpeechRecognition
 5. pip install customtkinter
 6. pip install python-dotenv
+7. pip install Pillow

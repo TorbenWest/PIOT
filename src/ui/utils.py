@@ -1,6 +1,8 @@
+import os
 from typing import Union
 
 import customtkinter
+from PIL import Image
 from customtkinter import CTkButton, CTkToplevel, CTk
 
 font_label_form: tuple[str, int] = ('Roboto', 20)
@@ -31,3 +33,8 @@ def cancel_button(root: Union[CTk, CTkToplevel], text: str = 'Cancel', row: int 
                                                 hover_color='#EEE', text_color='#000', command=lambda: root.destroy())
     button.grid(row=row, column=column, padx=padding_x, pady=(0, 5), sticky='es')
     return button
+
+
+def generate_image(image_name: str) -> Image:
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../resources/images')
+    return Image.open(os.path.join(image_path, image_name))
