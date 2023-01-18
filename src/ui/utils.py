@@ -35,6 +35,20 @@ def cancel_button(root: Union[CTk, CTkToplevel], text: str = 'Cancel', row: int 
     return button
 
 
-def generate_image(image_name: str) -> Image:
+def get_image(image_name: str) -> Image:
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../resources/images')
     return Image.open(os.path.join(image_path, image_name))
+
+
+# This method returns the correct fg_color to make an image transparent on a CTkFrame.
+def transparent_image(theme: str) -> str:
+    if customtkinter.get_appearance_mode() == 'Light':
+        if theme == 'dark-blue':
+            return '#E5E5E5'
+        else:
+            return '#DBDBDB'
+    else:
+        if theme == 'dark-blue':
+            return '#212121'
+        else:
+            return '#2B2B2B'

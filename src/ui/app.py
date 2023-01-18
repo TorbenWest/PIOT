@@ -2,11 +2,13 @@ import threading
 import time
 
 import customtkinter
+from customtkinter import CTkImage
 
 from bluetooth_service import BluetoothService
 from config_service import ConfigService
 from database_service import DatabaseService
-from ui.utils import center_window, generate_image
+from errors.invalid_ui_theme_error import InvalidUIThemeError
+from ui.utils import center_window, get_image, transparent_image
 from ui.windows import Windows
 from ui.windows_controller import UIController
 
@@ -22,8 +24,9 @@ class App(customtkinter.CTk):
         self.c_service = c_service
         self.main_frame = None
         self.controller = UIController(self.bt_service, self.db_service)
+        self.theme = self.c_service.ui_config.get('color_theme')
         customtkinter.set_appearance_mode(self.c_service.ui_config.get('appearance_mode'))
-        customtkinter.set_default_color_theme(self.c_service.ui_config.get('color_theme'))
+        customtkinter.set_default_color_theme(self.theme)
 
         app_width = 700
         app_height = 500
@@ -33,27 +36,26 @@ class App(customtkinter.CTk):
 
         # Configure window
         self.title("The Smart Door")
+        self.protocol('WM_DELETE_WINDOW', self.destroy)
         center_window(self, app_width, app_height)
 
+        # Loading screen
         self.progressbar_frame = customtkinter.CTkFrame(self, corner_radius=10)
         self.progressbar_frame.grid(sticky="nsew", rowspan=2, columnspan=2, padx=15, pady=20)
         self.progressbar_frame.grid_rowconfigure(0, weight=1)
         self.progressbar = customtkinter.CTkProgressBar(self.progressbar_frame)
 
-        # Todo adapt to other color theme
-        logo_img = customtkinter.CTkImage(generate_image('logo_dark_blue_high.png'), size=(500, 300))
         self.button_image = customtkinter.CTkButton(master=self.progressbar_frame, hover=False, state='disabled',
-                                                    text='', image=logo_img, fg_color='#212121')
+                                                    text='', image=self._get_logo_image(),
+                                                    fg_color=transparent_image(self.theme))
         self.button_image.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.6)
-
         self.progressbar.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.1)
-        self.protocol('WM_DELETE_WINDOW', self.destroy)
 
+        # Run progress bar
         self._thread = threading.Thread(target=self._update_progressbar)
         self._thread.start()
 
-    # TODO Add percentage label in center
-    def _update_progressbar(self):
+    def _update_progressbar(self) -> None:
         seconds: int = self.c_service.bluetooth_config.get('discover_duration') + 5
 
         t_start = time.time()
@@ -64,7 +66,19 @@ class App(customtkinter.CTk):
         self.progressbar_frame.destroy()
         self._main_window()
 
-    def _main_window(self):
+    def _get_logo_image(self) -> CTkImage:
+        if self.theme == 'blue':
+            logo_file = 'logo_blue.png'
+        elif self.theme == 'dark-blue':
+            logo_file = 'logo_dark_blue.png'
+        elif self.theme == 'green':
+            logo_file = 'logo_green.png'
+        else:
+            raise InvalidUIThemeError(self.theme)
+
+        return customtkinter.CTkImage(get_image(logo_file), size=(500, 300))
+
+    def _main_window(self) -> None:
         # Configure grid layout (3x2)
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)

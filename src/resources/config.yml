@@ -8,7 +8,7 @@ mysql:
 
 bluetooth:
   # How long the Bluetooth service should search for devices. Given in seconds.
-  discover_duration: 10
+  discover_duration: 5
   # The interval in which the scan method will be called. Given in seconds.
   scan_interval: 20
 
