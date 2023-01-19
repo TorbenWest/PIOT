@@ -32,23 +32,23 @@ async def backend():
     bt_service = BluetoothService(db_service)
     m_service = MicrophoneService(bt_service)
 
-    bluetooth_periodic = PeriodicAsync(
+    bluetooth_periodic = PeriodicSync(
         lambda: bt_service.scan(config_service.bluetooth_config.get('discover_duration')),
         config_service.bluetooth_config.get('scan_interval'))
 
     microphone = PeriodicAsync(lambda: m_service.listen(), 0.1)
 
     try:
-        await bluetooth_periodic.start()
+        bluetooth_periodic.start()
         await microphone.start()
 
         await asyncio.sleep(120)
 
-        await bluetooth_periodic.stop()
+        bluetooth_periodic.stop()
         await microphone.stop()
         connector.close_connection()
     finally:
-        await bluetooth_periodic.stop()
+        bluetooth_periodic.stop()
         await microphone.stop()
         connector.close_connection()
 

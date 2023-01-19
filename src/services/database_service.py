@@ -1,11 +1,10 @@
 import hashlib
-from datetime import datetime
 
 import mysql.connector
 from mysql.connector import errorcode
 
-from services.console_service import print_database
 from errors.user_not_exists_error import UserNotExistsError
+from services.console_service import print_database
 
 
 # https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html
@@ -146,6 +145,18 @@ class DatabaseService:
 
         return rs[0][0]
 
+    def has_user_locked_door(self, user_id: int) -> bool:
+        query: str = ("SELECT command, cmd_timestamp "
+                      "FROM sd_user_interaction_log "
+                      "WHERE user_id = %s "
+                      "ORDER BY cmd_timestamp DESC;")
+        rs: list = self._select(query, tuple([user_id]))
+
+        if len(rs) == 0:
+            return False
+
+        return rs[0][0] == 'cmd_lock'
+
     def get_commands_for_bd_addresses(self, bd_addresses: list) -> list:
         placeholder: str = ''
         for i in range(0, len(bd_addresses)):
@@ -236,11 +247,11 @@ class DatabaseService:
     def insert_interaction_log(self, user_id: int, command: str) -> None:
         # Define query
         add_interaction_log: str = ("INSERT INTO sd_user_interaction_log "
-                                    "(user_id, command, cmd_timestamp) "
-                                    "VALUES (%s, %s, %s);")
+                                    "(user_id, command) "
+                                    "VALUES (%s, %s);")
 
         # Inserting values
-        self._insert(add_interaction_log, (user_id, command, datetime.fromtimestamp(datetime.now().timestamp())))
+        self._insert(add_interaction_log, (user_id, command))
 
     # https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
     def _insert(self, statement: str, data: tuple) -> int:
