@@ -21,6 +21,16 @@ CREATE TABLE IF NOT EXISTS sd_user_interaction_log
 (
     user_id       int          NOT NULL,
     command       VARCHAR(255) NOT NULL CHECK (command IN ('cmd_open', 'cmd_close', 'cmd_lock', 'cmd_unlock')),
-    cmd_timestamp timestamp    NOT NULL,
+    cmd_timestamp timestamp    NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES sd_user (id) ON DELETE CASCADE
 );
+
+CREATE TRIGGER timestamp_check
+    BEFORE INSERT
+    ON sd_user_interaction_log
+    FOR EACH ROW
+BEGIN
+    IF NEW.cmd_timestamp > NOW() THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid date!';
+    END IF;
+END

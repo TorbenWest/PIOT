@@ -1,13 +1,19 @@
 mysql:
-  database: 'smartdoor'
-  user: 'smartdoor'
-  password: 'c$7^tvMaT7q51tZ0kY0w'
-  host: '45.142.115.34'
-  port: '3306'
+  database: ${MARIADB_DATABASE}
+  user: ${MARIADB_USER}
+  password: ${MARIADB_SMARTDOOR_PASSWORD}
+  host: ${MARIADB_HOST}
+  port: ${MARIADB_PORT}
   raise_on_warnings: false
 
 bluetooth:
   # How long the Bluetooth service should search for devices. Given in seconds.
-  discover_duration: 10
+  discover_duration: 5
   # The interval in which the scan method will be called. Given in seconds.
   scan_interval: 20
+
+user_interface:
+  # The appearance mode for all user interfaces. Can be 'Light', 'Dark', or 'System'.
+  appearance_mode: 'Dark'
+  # The color theme for all user interfaces. Can be 'blue', 'green', or 'dark-blue'.
+  color_theme: 'dark-blue'

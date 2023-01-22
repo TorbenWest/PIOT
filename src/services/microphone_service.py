@@ -26,13 +26,27 @@ class MicrophoneService:
 
         for current in self.db_service.get_commands_for_bd_addresses(addresses):
             user_id: int = current.get('user_id')
+            has_door_locked: bool = self.db_service.has_user_locked_door(user_id)
+
             if current.get('cmd_open') == word:
+                if has_door_locked:
+                    print_microphone(f'Could not open door for user {user_id}. The door is locked!')
+                    continue
+
                 self.d_service.open(user_id)
             elif current.get('cmd_close') == word:
                 self.d_service.close(user_id)
             elif current.get('cmd_lock') == word:
+                if has_door_locked:
+                    print_microphone(f'Could not lock door for user {user_id}. The door is already locked!')
+                    continue
+
                 self.d_service.lock(user_id)
             elif current.get('cmd_unlock') == word:
+                if not has_door_locked:
+                    print_microphone(f'Could not unlock door for user {user_id}. The door is not locked!')
+                    continue
+
                 self.d_service.unlock(user_id)
             else:
                 print_microphone(f'No match with user {user_id}!')
@@ -48,8 +62,11 @@ class MicrophoneService:
 
     @staticmethod
     def _get_audio() -> str:
+        # Find your device index:
+        # print(sr.Microphone.list_microphone_names())
         r = sr.Recognizer()
-        mic = sr.Microphone(device_index=1)
+        r.pause_threshold = 0.5
+        mic = sr.Microphone(device_index=2)
         with mic as source:
             r.adjust_for_ambient_noise(source)
             audio = r.listen(source)

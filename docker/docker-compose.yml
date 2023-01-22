@@ -1,0 +1,34 @@
+version: '3'
+services:
+  mariadb:
+    container_name: mariadb
+    image: "mariadb:latest"
+    restart: unless-stopped
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./mariadb:/var/lib/mysql"
+    ports:
+      - "${MARIADB_PORT}:${MARIADB_PORT}"
+    environment:
+      TZ: "Europe/Berlin"
+      MYSQL_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MARIADB_DATABASE}"
+      MYSQL_USER: "${MARIADB_USER}"
+      MYSQL_PASSWORD: "${MARIADB_SMARTDOOR_PASSWORD}"
+    command: --default-authentication-plugin=mysql_native_password, --wait_timeout=600
+    tty: true
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: "phpmyadmin/phpmyadmin:latest"
+    restart: unless-stopped
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - mariadb
+    environment:
+      PMA_HOST: "mariadb"
+      TZ: "Europe/Berlin"
+    ports:
+      - "3300:80"
+    tty: true
