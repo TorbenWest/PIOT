@@ -6,16 +6,17 @@
 1. https://www.activestate.com/resources/quick-reads/how-to-install-pip-on-windows/
 2. https://github.com/pybluez/pybluez/blob/master/docs/install.rst
 3. https://github.com/pybluez/pybluez/issues/431
-4. pip install pybluez2 (for windows)
+4. https://github.com/pybluez/pybluez/issues/236
+5. pip install pybluez2 (for windows)
 
 ### Fix UTF-8 database issue
 1. https://stackoverflow.com/questions/73244027/character-set-utf8-unsupported-in-python-mysql-connector
 
 ### Libraries
 1. pip3 install mysql-connector-python==8.0.29
-2. pip install pybluez
-3. pip install pyyaml
-4. pip install SpeechRecognition
-5. pip install customtkinter
-6. pip install python-dotenv
-7. pip install Pillow
+2. pip3 install pybluez
+3. pip3 install pyyaml
+4. pip3 install SpeechRecognition
+5. pip3 install customtkinter
+6. pip3 install python-dotenv
+7. pip3 install Pillow

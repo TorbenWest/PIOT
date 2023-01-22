@@ -4,9 +4,9 @@ import time
 import customtkinter
 from customtkinter import CTkImage
 
-from bluetooth_service import BluetoothService
-from config_service import ConfigService
-from database_service import DatabaseService
+from services.bluetooth_service import BluetoothService
+from services.config_service import ConfigService
+from services.database_service import DatabaseService
 from errors.invalid_ui_theme_error import InvalidUIThemeError
 from ui.utils import center_window, get_image, transparent_image
 from ui.windows import Windows

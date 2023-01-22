@@ -1,7 +1,7 @@
 from customtkinter import CTk, CTkTextbox
 
-from bluetooth_service import BluetoothService
-from database_service import DatabaseService
+from services.bluetooth_service import BluetoothService
+from services.database_service import DatabaseService
 from ui.windows import Windows
 
 
