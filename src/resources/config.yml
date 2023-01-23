@@ -8,9 +8,9 @@ mysql:
 
 bluetooth:
   # How long the Bluetooth service should search for devices. Given in seconds.
-  discover_duration: 5
+  discover_duration: 15
   # The interval in which the scan method will be called. Given in seconds.
-  scan_interval: 20
+  scan_interval: 10
 
 user_interface:
   # The appearance mode for all user interfaces. Can be 'Light', 'Dark', or 'System'.
