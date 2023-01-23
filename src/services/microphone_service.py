@@ -1,7 +1,7 @@
 import speech_recognition as sr
 
 from services.bluetooth_service import BluetoothService
-from services.console_service import print_microphone
+from services.console_service import print_microphone, print_door
 from services.database_service import DatabaseService
 from services.door_service import DoorService
 
@@ -30,7 +30,7 @@ class MicrophoneService:
 
             if current.get('cmd_open') == word:
                 if has_door_locked:
-                    print_microphone(f'Could not open door for user {user_id}. The door is locked!')
+                    print_door(f'Could not open door for user {user_id}. The door is locked!')
                     continue
 
                 self.d_service.open(user_id)
@@ -38,13 +38,13 @@ class MicrophoneService:
                 self.d_service.close(user_id)
             elif current.get('cmd_lock') == word:
                 if has_door_locked:
-                    print_microphone(f'Could not lock door for user {user_id}. The door is already locked!')
+                    print_door(f'Could not lock door for user {user_id}. The door is already locked!')
                     continue
 
                 self.d_service.lock(user_id)
             elif current.get('cmd_unlock') == word:
                 if not has_door_locked:
-                    print_microphone(f'Could not unlock door for user {user_id}. The door is not locked!')
+                    print_door(f'Could not unlock door for user {user_id}. The door is not locked!')
                     continue
 
                 self.d_service.unlock(user_id)

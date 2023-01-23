@@ -42,7 +42,7 @@ async def backend():
         bluetooth_periodic.start()
         await microphone.start()
 
-        await asyncio.sleep(120)
+        await asyncio.sleep(500)
 
         bluetooth_periodic.stop()
         await microphone.stop()

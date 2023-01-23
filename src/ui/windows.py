@@ -99,7 +99,7 @@ class Windows:
         frame_padding_x: int = 15
         total_width: int = 2 * frame_width + 4 * frame_padding_x
 
-        window = create_toplevel(app, total_width, 510, 'Register')
+        window = create_toplevel(app, total_width, 490, 'Register')
 
         # Label heading
         customtkinter.CTkLabel(window, text='Register An Account', width=30,
@@ -114,7 +114,7 @@ class Windows:
         # Label user settings
         customtkinter.CTkLabel(left_frame_login, text='User Settings', width=30,
                                font=font_label_frame_header,
-                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 20))
+                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 5))
 
         # Label username
         customtkinter.CTkLabel(left_frame_login, text='Username:', width=30, font=font_label_form,
@@ -156,7 +156,7 @@ class Windows:
         # Label command settings
         customtkinter.CTkLabel(right_frame_login, text='Command Settings', width=30,
                                font=font_label_frame_header,
-                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 20))
+                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 5))
 
         # Label open
         customtkinter.CTkLabel(right_frame_login, text='Open:', width=30, font=font_label_form,
