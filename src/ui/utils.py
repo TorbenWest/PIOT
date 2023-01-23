@@ -19,10 +19,10 @@ def center_window(window, width: int, height: int) -> None:
 
 def create_toplevel(root: CTk, width: int, height: int, title: str = '', resizable: bool = False) -> CTkToplevel:
     window = customtkinter.CTkToplevel(root)
+    center_window(window, width, height)
     window.title(f'The Smart Door - {title}')
     window.wait_visibility()
     window.grab_set()
-    center_window(window, width, height)
     if not resizable:
         window.resizable(width=False, height=False)
     return window
