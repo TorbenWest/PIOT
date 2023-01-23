@@ -99,7 +99,7 @@ class Windows:
         frame_padding_x: int = 15
         total_width: int = 2 * frame_width + 4 * frame_padding_x
 
-        window = create_toplevel(app, total_width, 455, 'Register')
+        window = create_toplevel(app, total_width, 450, 'Register')
 
         # Label heading
         customtkinter.CTkLabel(window, text='Register An Account', width=30,
@@ -139,13 +139,13 @@ class Windows:
         # Label bluetooth device
         customtkinter.CTkLabel(left_frame_login, text='Select Bluetooth Device:', width=30,
                                font=font_label_form,
-                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(55, 5),
+                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(50, 5),
                                                                 sticky='w')
 
         # Entry bluetooth device
         entry_bluetooth_device = customtkinter.CTkOptionMenu(left_frame_login, dynamic_resizing=True,
                                                              values=names, width=entry_width)
-        entry_bluetooth_device.grid(row=6, column=0, padx=padding_x, pady=(0, 15), sticky='w')
+        entry_bluetooth_device.grid(row=6, column=0, padx=padding_x, pady=(0, 10), sticky='w')
         # - Left Frame - #
 
         # - Right Frame - #
@@ -204,7 +204,7 @@ class Windows:
                                               width=entry_width,
                                               height=30,
                                               border_width=2, corner_radius=10)
-        entry_unlock.grid(row=8, column=0, padx=padding_x, pady=(0, 15), sticky='w')
+        entry_unlock.grid(row=8, column=0, padx=padding_x, pady=(0, 5), sticky='w')
 
         # Fill in values if "Settings" was selected
         if user is not None:
