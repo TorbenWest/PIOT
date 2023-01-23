@@ -99,7 +99,7 @@ class Windows:
         frame_padding_x: int = 15
         total_width: int = 2 * frame_width + 4 * frame_padding_x
 
-        window = create_toplevel(app, total_width, 490, 'Register')
+        window = create_toplevel(app, total_width, 465, 'Register')
 
         # Label heading
         customtkinter.CTkLabel(window, text='Register An Account', width=30,
@@ -114,11 +114,11 @@ class Windows:
         # Label user settings
         customtkinter.CTkLabel(left_frame_login, text='User Settings', width=30,
                                font=font_label_frame_header,
-                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 5))
+                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(5, 5))
 
         # Label username
         customtkinter.CTkLabel(left_frame_login, text='Username:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=1, column=0, padx=padding_x, pady=(20, 5),
+                               height=25, corner_radius=7).grid(row=1, column=0, padx=padding_x, pady=(15, 5),
                                                                 sticky='w')
 
         # Entry username
@@ -128,7 +128,7 @@ class Windows:
 
         # Label password
         customtkinter.CTkLabel(left_frame_login, text='Password:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=3, column=0, padx=padding_x, pady=(60, 5),
+                               height=25, corner_radius=7).grid(row=3, column=0, padx=padding_x, pady=(55, 5),
                                                                 sticky='w')
 
         # Entry password
@@ -139,7 +139,7 @@ class Windows:
         # Label bluetooth device
         customtkinter.CTkLabel(left_frame_login, text='Select Bluetooth Device:', width=30,
                                font=font_label_form,
-                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(60, 5),
+                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(55, 5),
                                                                 sticky='w')
 
         # Entry bluetooth device
@@ -156,11 +156,11 @@ class Windows:
         # Label command settings
         customtkinter.CTkLabel(right_frame_login, text='Command Settings', width=30,
                                font=font_label_frame_header,
-                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(10, 5))
+                               height=25, corner_radius=7).grid(row=0, column=0, padx=padding_x, pady=(5, 5))
 
         # Label open
         customtkinter.CTkLabel(right_frame_login, text='Open:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=1, column=0, padx=padding_x, pady=(20, 5),
+                               height=25, corner_radius=7).grid(row=1, column=0, padx=padding_x, pady=(15, 5),
                                                                 sticky='w')
 
         # Entry open
@@ -172,7 +172,7 @@ class Windows:
 
         # Label close
         customtkinter.CTkLabel(right_frame_login, text='Close:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=3, column=0, padx=padding_x, pady=(20, 5),
+                               height=25, corner_radius=7).grid(row=3, column=0, padx=padding_x, pady=(15, 5),
                                                                 sticky='w')
 
         # Entry close
@@ -184,7 +184,7 @@ class Windows:
 
         # Label lock
         customtkinter.CTkLabel(right_frame_login, text='Lock:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(20, 5),
+                               height=25, corner_radius=7).grid(row=5, column=0, padx=padding_x, pady=(15, 5),
                                                                 sticky='w')
 
         # Entry lock
@@ -196,7 +196,7 @@ class Windows:
 
         # Label unlock
         customtkinter.CTkLabel(right_frame_login, text='Unlock:', width=30, font=font_label_form,
-                               height=25, corner_radius=7).grid(row=7, column=0, padx=padding_x, pady=(20, 5),
+                               height=25, corner_radius=7).grid(row=7, column=0, padx=padding_x, pady=(15, 5),
                                                                 sticky='w')
 
         # Entry unlock
