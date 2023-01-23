@@ -48,7 +48,7 @@ class App(customtkinter.CTk):
         self.button_image = customtkinter.CTkButton(master=self.progressbar_frame, hover=False, state='disabled',
                                                     text='', image=self._get_logo_image(),
                                                     fg_color=transparent_image(self.theme))
-        self.button_image.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.5)
+        self.button_image.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.7)
         self.progressbar.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.1)
 
         # Run progress bar
